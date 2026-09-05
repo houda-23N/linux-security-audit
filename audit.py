@@ -22,7 +22,7 @@ from modules.logs import (
     analyze_security_logs
 )
 from modules.risk import generate_risk_summary
-
+from modules.report import save_html_report
 
 def run_audit():
     """Run all security audit modules."""
@@ -250,6 +250,23 @@ def main():
     results = run_audit()
 
     display_results(results)
+
+    report_path = "reports/security_report.html"
+
+    save_html_report(
+        results,
+        report_path
+    )
+
+    print("\n================================")
+    print("        REPORT GENERATED")
+    print("================================")
+
+    print(
+        f"\nHTML report saved to:"
+    )
+
+    print(report_path)
 
 
 if __name__ == "__main__":

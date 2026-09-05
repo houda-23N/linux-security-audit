@@ -1,6 +1,6 @@
 from datetime import datetime
 from html import escape
-
+import os
 
 def get_severity_class(severity):
     """Return a CSS class based on finding severity."""
@@ -401,6 +401,14 @@ def save_html_report(results, output_path):
     """Generate and save the HTML report."""
 
     html = generate_html_report(results)
+
+    directory = os.path.dirname(output_path)
+
+    if directory:
+        os.makedirs(
+            directory,
+            exist_ok=True
+        )
 
     with open(
         output_path,
