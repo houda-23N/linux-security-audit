@@ -2,6 +2,23 @@ from datetime import datetime
 from html import escape
 import os
 
+RECOMMENDATIONS = {
+    "Password authentication is enabled.": (
+        "Consider disabling SSH password authentication "
+        "and using public-key authentication where appropriate."
+    ),
+
+    "CUPS printing service is currently running.": (
+        "Disable the CUPS service if printing is not required "
+        "on this system."
+    ),
+
+    "UFW firewall is inactive.": (
+        "Enable the UFW firewall and use a default-deny "
+        "incoming policy, allowing only required services."
+    ),
+}
+
 def get_severity_class(severity):
     """Return a CSS class based on finding severity."""
 
@@ -44,7 +61,10 @@ def generate_findings_html(findings):
         issue = escape(
             str(finding.get("issue", "Unknown issue"))
         )
-
+        recommendation = RECOMMENDATIONS.get(
+             finding.get("issue"),
+             "Review this finding and apply appropriate security controls."
+        )
         severity_class = get_severity_class(
             severity
         )
@@ -60,9 +80,13 @@ def generate_findings_html(findings):
                     {escape(severity)}
                 </span>
             </div>
-
             <div class="finding-description">
                 {issue}
+            </div>
+
+            <div class="recommendation">
+               <strong>Recommendation:</strong>
+                 {escape(recommendation)}
             </div>
         </div>
         """
@@ -111,6 +135,14 @@ def generate_html_report(results):
             padding: 0;
             background: #f4f6f8;
             color: #222;
+        }}
+       
+        .recommendation {{
+            margin-top: 12px;
+            padding: 10px;
+            background: #eef2f5;
+            border-radius: 5px;
+            line-height: 1.5;
         }}
 
         .container {{
