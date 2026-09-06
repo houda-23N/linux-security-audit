@@ -66,7 +66,21 @@ def analyze_ssh_security(config):
     if not config["installed"]:
         findings.append({
             "severity": "INFO",
-            "issue": "SSH server configuration was not found."
+            "issue": "SSH server configuration was not found.",
+            "evidence": (
+                "The SSH server configuration file "
+                "/etc/ssh/sshd_config was not found."
+            ),
+            "impact": (
+                "SSH server security settings could not be "
+                "evaluated because no server configuration "
+                "was detected."
+            ),
+            "recommendation": (
+                "If SSH server access is required, verify that "
+                "the SSH server is installed and configured "
+                "according to your security requirements."
+            )
         })
 
         return findings
@@ -74,12 +88,35 @@ def analyze_ssh_security(config):
     settings = config["settings"]
 
     # Check root login
-    root_login = settings.get("PermitRootLogin", "").lower()
+    root_login = settings.get(
+        "PermitRootLogin",
+        ""
+    ).lower()
 
-    if root_login in ["yes", "without-password", "prohibit-password"]:
+    if root_login in [
+        "yes",
+        "without-password",
+        "prohibit-password"
+    ]:
         findings.append({
             "severity": "HIGH",
-            "issue": f"Root SSH login setting: {root_login}"
+            "issue": (
+                f"Root SSH login setting: {root_login}"
+            ),
+            "evidence": (
+                "The PermitRootLogin setting was detected as: "
+                f"{root_login}"
+            ),
+            "impact": (
+                "Allowing direct root login over SSH increases "
+                "the risk associated with compromised "
+                "administrator credentials."
+            ),
+            "recommendation": (
+                "Disable direct root SSH login where possible "
+                "and use a standard user account with "
+                "controlled privilege escalation."
+            )
         })
 
     # Check password authentication
@@ -91,7 +128,23 @@ def analyze_ssh_security(config):
     if password_auth == "yes":
         findings.append({
             "severity": "MEDIUM",
-            "issue": "Password authentication is enabled."
+            "issue": (
+                "Password authentication is enabled."
+            ),
+            "evidence": (
+                "SSH configuration allows password-based "
+                "authentication."
+            ),
+            "impact": (
+                "Password-based SSH authentication may be more "
+                "susceptible to password guessing and "
+                "brute-force attacks."
+            ),
+            "recommendation": (
+                "Consider disabling SSH password authentication "
+                "after confirming that secure public-key "
+                "authentication is configured and tested."
+            )
         })
 
     # Check empty passwords
@@ -103,7 +156,23 @@ def analyze_ssh_security(config):
     if empty_passwords == "yes":
         findings.append({
             "severity": "CRITICAL",
-            "issue": "Empty passwords are permitted for SSH."
+            "issue": (
+                "Empty passwords are permitted for SSH."
+            ),
+            "evidence": (
+                "The PermitEmptyPasswords setting was detected "
+                "as enabled."
+            ),
+            "impact": (
+                "Allowing empty passwords can enable "
+                "unauthorized access to accounts that do not "
+                "have a password configured."
+            ),
+            "recommendation": (
+                "Set PermitEmptyPasswords to no and verify that "
+                "all SSH-accessible accounts use strong "
+                "authentication."
+            )
         })
 
     return findings

@@ -61,9 +61,17 @@ def generate_findings_html(findings):
         issue = escape(
             str(finding.get("issue", "Unknown issue"))
         )
-        recommendation = RECOMMENDATIONS.get(
-             finding.get("issue"),
-             "Review this finding and apply appropriate security controls."
+        recommendation = finding.get("recommendation",
+             RECOMMENDATIONS.get(finding.get("issue"),
+        "Review this finding and apply appropriate security controls."
+        )
+        )
+        evidence = finding.get("evidence",
+         "No additional evidence was recorded."
+        )
+
+        impact = finding.get("impact",
+         "The security impact should be reviewed."
         )
         severity_class = get_severity_class(
             severity
@@ -81,12 +89,23 @@ def generate_findings_html(findings):
                 </span>
             </div>
             <div class="finding-description">
-                {issue}
+              <strong>Finding:</strong><br>
+                   {issue}
+            </div>
+
+            <div class="evidence">
+              <strong>Evidence:</strong><br>
+                  {escape(str(evidence))}
+            </div>
+
+            <div class="impact">
+              <strong>Impact:</strong><br>
+                  {escape(str(impact))}
             </div>
 
             <div class="recommendation">
-               <strong>Recommendation:</strong>
-                 {escape(recommendation)}
+              <strong>Recommendation:</strong><br>
+                 {escape(str(recommendation))}
             </div>
         </div>
         """
@@ -136,7 +155,8 @@ def generate_html_report(results):
             background: #f4f6f8;
             color: #222;
         }}
-       
+        .evidence,
+        .impact,
         .recommendation {{
             margin-top: 12px;
             padding: 10px;

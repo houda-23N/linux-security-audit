@@ -97,8 +97,17 @@ def analyze_firewall(firewall):
 
     if not firewall["active"]:
         findings.append({
-            "severity": "HIGH",
-            "issue": "UFW firewall is inactive."
+           "severity": "HIGH",
+           "issue": "UFW firewall is inactive.",
+           "evidence": "UFW status was detected as inactive.",
+           "impact": (
+               "The system has reduced protection against "
+               "unwanted incoming network connections."
+               ),
+           "recommendation": (
+               "Enable UFW and configure firewall rules to "
+               "allow only required services."
+              )
         })
 
         return findings

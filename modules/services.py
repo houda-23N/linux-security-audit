@@ -100,8 +100,20 @@ def analyze_services(services):
                 "severity": severity,
                 "issue": (
                     f"{service_name} service is currently running."
+                ),
+                "evidence": (
+                    f"The {service_name} service was detected "
+                    f"as running on the system."
+                ),
+                "impact": (
+                    "Running unnecessary services increases the "
+                    "system attack surface and may expose "
+                    "additional network-accessible functionality."
+                ),
+                "recommendation": (
+                    f"Disable the {service_name} service if its "
+                    "functionality is not required."
                 )
             })
 
     return findings
-
