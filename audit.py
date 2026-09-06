@@ -218,6 +218,11 @@ def display_results(results):
     )
 
     print(
+        f"\nAssessment: "
+        f"{risk['risk_explanation']}"
+    )
+
+    print(
         f"Risk Points: "
         f"{risk['risk_points']}"
     )

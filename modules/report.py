@@ -108,7 +108,7 @@ def generate_html_report(results):
     score = risk["security_score"]
     risk_level = risk["risk_level"]
     risk_points = risk["risk_points"]
-
+    risk_explanation = risk["risk_explanation"]
     severity_counts = risk["severity_counts"]
 
     findings_html = generate_findings_html(
@@ -291,7 +291,11 @@ def generate_html_report(results):
             }}
 
         }}
-
+        .risk-explanation {{
+            margin-top: 15px;
+            line-height: 1.5;
+            color: #555;
+        }}
     </style>
 
 </head>
@@ -326,7 +330,10 @@ def generate_html_report(results):
         <div class="risk-points">
             Risk Points: {risk_points}
         </div>
-
+       
+        <div class="risk-explanation">
+            {escape(risk_explanation)}
+        </div>
     </div>
 
 

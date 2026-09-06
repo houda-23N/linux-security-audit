@@ -47,6 +47,37 @@ def determine_risk_level(score):
 
     return "CRITICAL"
 
+def get_risk_explanation(risk_level):
+    """Return a human-readable explanation of the risk level."""
+
+    explanations = {
+        "LOW": (
+            "The system has a relatively low number of "
+            "identified security concerns. Continue applying "
+            "regular security updates and monitoring."
+        ),
+
+        "MEDIUM": (
+            "The system has security findings that should be "
+            "reviewed and addressed. Higher-severity findings "
+            "should be prioritized."
+        ),
+
+        "HIGH": (
+            "The system has significant security concerns that "
+            "should be addressed as soon as possible."
+        ),
+
+        "CRITICAL": (
+            "The system has serious security weaknesses that "
+            "require immediate attention and remediation."
+        )
+    }
+
+    return explanations.get(
+        risk_level,
+        "No risk assessment explanation is available."
+    )
 
 def count_findings_by_severity(findings):
     """Count findings by severity."""
@@ -77,11 +108,14 @@ def generate_risk_summary(findings):
 
     risk_level = determine_risk_level(score)
 
+    risk_explanation = get_risk_explanation(risk_level)
+
     severity_counts = count_findings_by_severity(findings)
 
     return {
         "risk_points": risk_points,
         "security_score": score,
         "risk_level": risk_level,
+        "risk_explanation": risk_explanation,
         "severity_counts": severity_counts
     }
