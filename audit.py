@@ -1,3 +1,5 @@
+import argparse
+
 from modules.system import get_system_info
 from modules.users import get_users, get_privileged_users
 from modules.ssh import read_ssh_config, analyze_ssh_security
@@ -24,155 +26,255 @@ from modules.logs import (
 from modules.risk import generate_risk_summary
 from modules.report import save_html_report
 
-def run_audit():
+
+VERSION = "1.0.0"
+
+def parse_arguments():
+    """Parse command-line arguments."""
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Linux Security Audit Tool - "
+            "Perform security checks and generate reports."
+        ),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {VERSION}"
+    )
+
+    report_group = parser.add_mutually_exclusive_group()
+
+    report_group.add_argument(
+        "--no-report",
+        action="store_true",
+        help="Run the audit without generating an HTML report."
+    )
+
+    report_group.add_argument(
+        "--report",
+        metavar="PATH",
+        help=(
+            "Specify the output path for the HTML report."
+        )
+    )
+
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help=(
+        "Suppress audit progress messages while "
+        "keeping the final results visible."
+        )
+    )
+
+    return parser.parse_args()
+
+
+def print_progress(message, quiet):
+    """Print progress messages unless quiet mode is enabled."""
+
+    if not quiet:
+        print(message)
+
+
+def run_audit(quiet=False):
     """Run all security audit modules."""
 
     all_findings = []
 
-    print("\n================================")
-    print("       LINUX SECURITY AUDIT")
-    print("================================")
+    print_progress(
+        "\n================================\n"
+        "       LINUX SECURITY AUDIT\n"
+        "================================",
+        quiet
+    )
 
     # -----------------------------
     # SYSTEM INFORMATION
     # -----------------------------
 
-    print("\n[1/8] Collecting system information...")
+    print_progress(
+        "\n[1/8] Collecting system information...",
+        quiet
+    )
 
     system_info = get_system_info()
 
-    print(
+    print_progress(
         f"System: "
         f"{system_info['Operating System']} "
-        f"{system_info['OS Release']}"
+        f"{system_info['OS Release']}",
+        quiet
     )
 
-    print(
+    print_progress(
         f"Hostname: "
-        f"{system_info['Hostname']}"
+        f"{system_info['Hostname']}",
+        quiet
     )
 
     # -----------------------------
     # USER AUDIT
     # -----------------------------
 
-    print("\n[2/8] Auditing users and privileges...")
+    print_progress(
+        "\n[2/8] Auditing users and privileges...",
+        quiet
+    )
 
     users = get_users()
     privileged_users = get_privileged_users(users)
 
-    print(f"Users detected: {len(users)}")
-    print(
+    print_progress(
+        f"Users detected: {len(users)}",
+        quiet
+    )
+
+    print_progress(
         f"Privileged users detected: "
-        f"{len(privileged_users)}"
+        f"{len(privileged_users)}",
+        quiet
     )
 
     # -----------------------------
     # SSH AUDIT
     # -----------------------------
 
-    print("\n[3/8] Auditing SSH configuration...")
+    print_progress(
+        "\n[3/8] Auditing SSH configuration...",
+        quiet
+    )
 
     ssh_config = read_ssh_config()
     ssh_findings = analyze_ssh_security(ssh_config)
 
     all_findings.extend(ssh_findings)
 
-    print(
+    print_progress(
         f"SSH findings: "
-        f"{len(ssh_findings)}"
+        f"{len(ssh_findings)}",
+        quiet
     )
 
     # -----------------------------
     # NETWORK AUDIT
     # -----------------------------
 
-    print("\n[4/8] Auditing network exposure...")
+    print_progress(
+        "\n[4/8] Auditing network exposure...",
+        quiet
+    )
 
     connections = get_listening_ports()
-    network_findings = analyze_network_security(connections)
+    network_findings = analyze_network_security(
+        connections
+    )
 
     all_findings.extend(network_findings)
 
-    print(
+    print_progress(
         f"Listening sockets: "
-        f"{len(connections)}"
+        f"{len(connections)}",
+        quiet
     )
 
-    print(
+    print_progress(
         f"Network findings: "
-        f"{len(network_findings)}"
+        f"{len(network_findings)}",
+        quiet
     )
 
     # -----------------------------
     # SERVICES AUDIT
     # -----------------------------
 
-    print("\n[5/8] Auditing running services...")
+    print_progress(
+        "\n[5/8] Auditing running services...",
+        quiet
+    )
 
     services = get_running_services()
     service_findings = analyze_services(services)
 
     all_findings.extend(service_findings)
 
-    print(
+    print_progress(
         f"Running services: "
-        f"{len(services)}"
+        f"{len(services)}",
+        quiet
     )
 
-    print(
+    print_progress(
         f"Service findings: "
-        f"{len(service_findings)}"
+        f"{len(service_findings)}",
+        quiet
     )
 
     # -----------------------------
     # FIREWALL AUDIT
     # -----------------------------
 
-    print("\n[6/8] Auditing firewall configuration...")
+    print_progress(
+        "\n[6/8] Auditing firewall configuration...",
+        quiet
+    )
 
     firewall = get_ufw_status()
     firewall_findings = analyze_firewall(firewall)
 
     all_findings.extend(firewall_findings)
 
-    print(
+    print_progress(
         f"Firewall findings: "
-        f"{len(firewall_findings)}"
+        f"{len(firewall_findings)}",
+        quiet
     )
 
     # -----------------------------
     # FILE PERMISSIONS AUDIT
     # -----------------------------
 
-    print("\n[7/8] Auditing sensitive file permissions...")
+    print_progress(
+        "\n[7/8] Auditing sensitive file permissions...",
+        quiet
+    )
 
     permission_results = audit_sensitive_permissions()
+
     permission_findings = analyze_permissions(
         permission_results
     )
 
     all_findings.extend(permission_findings)
 
-    print(
+    print_progress(
         f"Permission findings: "
-        f"{len(permission_findings)}"
+        f"{len(permission_findings)}",
+        quiet
     )
 
     # -----------------------------
     # SECURITY LOG AUDIT
     # -----------------------------
 
-    print("\n[8/8] Auditing security logs...")
+    print_progress(
+        "\n[8/8] Auditing security logs...",
+        quiet
+    )
 
     logs = get_recent_security_logs()
     log_findings = analyze_security_logs(logs)
 
     all_findings.extend(log_findings)
 
-    print(
+    print_progress(
         f"Security log findings: "
-        f"{len(log_findings)}"
+        f"{len(log_findings)}",
+        quiet
     )
 
     # -----------------------------
@@ -252,11 +354,23 @@ def display_results(results):
 def main():
     """Program entry point."""
 
-    results = run_audit()
+    args = parse_arguments()
+
+    results = run_audit(
+        quiet=args.quiet
+    )
 
     display_results(results)
 
-    report_path = "reports/security_report.html"
+    if args.no_report:
+        print("\nHTML report generation skipped.")
+        return
+
+    report_path = (
+        args.report
+        if args.report
+        else "reports/security_report.html"
+    )
 
     save_html_report(
         results,
@@ -267,12 +381,10 @@ def main():
     print("        REPORT GENERATED")
     print("================================")
 
-    print(
-        f"\nHTML report saved to:"
-    )
-
+    print("\nHTML report saved to:")
     print(report_path)
 
 
 if __name__ == "__main__":
     main()
+
