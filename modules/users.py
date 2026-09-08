@@ -24,10 +24,11 @@ def get_users():
 
     return users
 
-def get_privileged_users(users):
-    """Identify users with administrative privileges."""
 
-    privileged_users = []
+def get_groups():
+    """Return local group information from /etc/group."""
+
+    groups = []
 
     try:
         with open("/etc/group", "r") as file:
@@ -36,14 +37,81 @@ def get_privileged_users(users):
 
                 if len(parts) >= 4:
                     group_name = parts[0]
-                    members = parts[3].split(",")
+                    members = [
+                        user
+                        for user in parts[3].split(",")
+                        if user
+                    ]
 
-                    if group_name in ["sudo", "adm"]:
-                        for user in members:
-                            if user and user not in privileged_users:
-                                privileged_users.append(user)
+                    groups.append({
+                        "name": group_name,
+                        "members": members
+                    })
 
     except PermissionError:
         return []
 
+    return groups
+
+
+def get_privileged_users_from_groups(groups):
+    """Identify users belonging to privileged groups."""
+
+    privileged_users = []
+
+    privileged_groups = {
+        "sudo",
+        "adm"
+    }
+
+    for group in groups:
+        group_name = group.get("name", "")
+        members = group.get("members", [])
+
+        if group_name in privileged_groups:
+            for user in members:
+                if user and user not in privileged_users:
+                    privileged_users.append(user)
+
     return privileged_users
+
+
+def get_privileged_users(users):
+    """Identify users with administrative privileges."""
+
+    groups = get_groups()
+
+    return get_privileged_users_from_groups(groups)
+
+
+    return groups
+
+
+def get_privileged_users_from_groups(groups):
+    """Identify users belonging to privileged groups."""
+
+    privileged_users = []
+
+    privileged_groups = {
+        "sudo",
+        "adm"
+    }
+
+    for group in groups:
+        group_name = group.get("name", "")
+        members = group.get("members", [])
+
+        if group_name in privileged_groups:
+            for user in members:
+                if user and user not in privileged_users:
+                    privileged_users.append(user)
+
+    return privileged_users
+
+
+def get_privileged_users(users):
+    """Identify users with administrative privileges."""
+
+    groups = get_groups()
+
+    return get_privileged_users_from_groups(groups)
