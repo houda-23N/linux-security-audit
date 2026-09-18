@@ -5,7 +5,7 @@ about: Report a reproducible problem with the Linux Security Audit Toolkit
 title: "[BUG] "
 labels: bug
 assignees: ""
--------------
+---
 
 # Bug Report
 
